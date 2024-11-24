@@ -91,10 +91,6 @@ Proyek ini dikerjakan oleh:
 - **11423059_Venesa Herawaty Hutajulu** (Anggota)
 
 ---
-
-## 🌟 Lisensi
-Proyek ini dilisensikan di bawah [MIT License](LICENSE). Silakan gunakan dan modifikasi sesuai kebutuhan, dengan memberikan atribusi yang sesuai.
-
 ---
 
 ### Selamat datang di dunia kecerdasan buatan untuk konservasi! 🌍🦋
