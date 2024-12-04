@@ -52,6 +52,20 @@ model = Sequential([
     Conv2D(64, (3, 3), activation='relu'),
     MaxPooling2D(2, 2),
     Dropout(0.25),
+    
+    Conv2D(64, (3, 3), activation='relu'),
+    BatchNormalization(),
+    Conv2D(64, (3, 3), activation='relu'),
+    MaxPooling2D(2, 2),
+    Dropout(0.25),
+
+    Conv2D(64, (3, 3), activation='relu'),
+    BatchNormalization(),
+    Conv2D(64, (3, 3), activation='relu'),
+    MaxPooling2D(2, 2),
+    Dropout(0.25),
+
+
 
     Conv2D(128, (3, 3), activation='relu'),
     BatchNormalization(),

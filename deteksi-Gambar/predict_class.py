@@ -27,28 +27,34 @@ def preprocess_image(image_path, target_size=(64, 64)):
     img_array /= 255.0
     return img_array
 
-# Define function to make a prediction and display class probabilities as a graph
+# Define function to make a prediction and display top probabilities
 def predict_image(image_path, class_labels):
     img_array = preprocess_image(image_path)
     # Get model predictions
     predictions = model.predict(img_array)[0]
-    # Sort class probabilities in descending order for clear display
+    # Sort class probabilities in descending order
     sorted_indices = np.argsort(predictions)[::-1]
     sorted_probs = predictions[sorted_indices]
     sorted_classes = [class_labels[i] for i in sorted_indices]
     
-    # Find the top class with highest probability
-    top_class = sorted_classes[0]
-    top_probability = sorted_probs[0]
+    # Get the top 5 classes and probabilities for Command Prompt
+    top_classes = sorted_classes[:5]
+    top_probs = sorted_probs[:5]
 
-    # Print the result with the highest probability
-    print(f"The model predicts this image as '{top_class}' with a probability of {top_probability:.2f}")
+    # Print top 5 classes and probabilities to Command Prompt
+    print("\nTop 5 Predictions:")
+    for i, (cls, prob) in enumerate(zip(top_classes, top_probs), 1):
+        print(f"{i}. {cls}: {prob:.2f}")
 
-    # Display class probabilities as a bar chart
-    plt.figure(figsize=(10, 6))
-    plt.barh(sorted_classes, sorted_probs, color='skyblue')
+    # Get top 75 classes and probabilities for the diagram
+    diagram_classes = sorted_classes[:75]
+    diagram_probs = sorted_probs[:75]
+
+    # Display top 75 class probabilities as a bar chart
+    plt.figure(figsize=(12, 8))
+    plt.barh(diagram_classes, diagram_probs, color='skyblue')
     plt.xlabel('Probability')
-    plt.title('Prediction Probabilities for Each Class')
+    plt.title('Top 75 Prediction Probabilities for Each Class')
     plt.gca().invert_yaxis()  # Invert y-axis to show highest probability at top
     plt.show()
 
