@@ -2,12 +2,14 @@ import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout, BatchNormalization
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
+from tensorflow.keras.regularizers import l2
 import pandas as pd
 import matplotlib.pyplot as plt
 import json
 
 # Define dataset directory
-dataset_dir = r'C:\Users\lenovo\deteksi-Gambar\butterfly-image-classification\train'
+dataset_dir = r'C:\Users\samue\Project_Certan_04\deteksi-Gambar\butterfly-image-classification\train'
 
 # Data augmentation for training
 datagen = ImageDataGenerator(
@@ -39,59 +41,58 @@ validation_generator = datagen.flow_from_directory(
     subset='validation'
 )
 
-# Build a more complex CNN model
+# Build the CNN model
 model = Sequential([
-    Conv2D(32, (3, 3), activation='relu', input_shape=(64, 64, 3)),
+    Conv2D(128, (3, 3), activation='relu', padding='same', kernel_regularizer=l2(0.001), input_shape=(64, 64, 3)),
     BatchNormalization(),
-    Conv2D(32, (3, 3), activation='relu'),
+    Conv2D(128, (3, 3), activation='relu', padding='same', kernel_regularizer=l2(0.001)),
+    MaxPooling2D(2, 2),
+    Dropout(0.4),
+
+    Conv2D(96, (3, 3), activation='relu', padding='same', kernel_regularizer=l2(0.001)),
+    BatchNormalization(),
+    Conv2D(96, (3, 3), activation='relu', padding='same', kernel_regularizer=l2(0.001)),
+    MaxPooling2D(2, 2),
+    Dropout(0.35),
+
+    Conv2D(64, (3, 3), activation='relu', padding='same', kernel_regularizer=l2(0.001)),
+    BatchNormalization(),
+    Conv2D(64, (3, 3), activation='relu', padding='same', kernel_regularizer=l2(0.001)),
+    MaxPooling2D(2, 2),
+    Dropout(0.3),
+
+    Conv2D(32, (3, 3), activation='relu', padding='same', kernel_regularizer=l2(0.001)),
+    BatchNormalization(),
+    Conv2D(32, (3, 3), activation='relu', padding='same', kernel_regularizer=l2(0.001)),
     MaxPooling2D(2, 2),
     Dropout(0.25),
-    
-    Conv2D(64, (3, 3), activation='relu'),
-    BatchNormalization(),
-    Conv2D(64, (3, 3), activation='relu'),
-    MaxPooling2D(2, 2),
-    Dropout(0.25),
-    
-    Conv2D(64, (3, 3), activation='relu'),
-    BatchNormalization(),
-    Conv2D(64, (3, 3), activation='relu'),
-    MaxPooling2D(2, 2),
-    Dropout(0.25),
-
-    Conv2D(64, (3, 3), activation='relu'),
-    BatchNormalization(),
-    Conv2D(64, (3, 3), activation='relu'),
-    MaxPooling2D(2, 2),
-    Dropout(0.25),
-
-
-
-    Conv2D(128, (3, 3), activation='relu'),
-    BatchNormalization(),
-    Conv2D(128, (3, 3), activation='relu'),
-    MaxPooling2D(2, 2),
-    Dropout(0.5),
 
     Flatten(),
-    Dense(512, activation='relu'),
+    Dense(512, activation='relu', kernel_regularizer=l2(0.001)),
     Dropout(0.5),
     Dense(train_generator.num_classes, activation='softmax')
 ])
 
-# Compile the model
-model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+# Compile the model with a smaller learning rate
+model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.0001), 
+              loss='categorical_crossentropy', 
+              metrics=['accuracy'])
 
-# Train the model and store history
+# Callbacks for EarlyStopping and Learning Rate Reduction
+early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
+reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=5, min_lr=1e-6)
+
+# Train the model
 history = model.fit(
     train_generator,
-    epochs=20,
-    validation_data=validation_generator
+    epochs=5,  # Allow more epochs for better generalization
+    validation_data=validation_generator,
+    callbacks=[early_stopping, reduce_lr]
 )
 
 # Save the model
-model.save('superclass_cnn_model.h5')
-print("Model saved as 'superclass_cnn_model.h5'")
+model.save('superclass_cnn_model_with_not_butterfly.h5')
+print("Model saved as 'superclass_cnn_model_with_not_butterfly.h5'")
 
 # Save class indices to a JSON file
 class_indices = train_generator.class_indices
@@ -99,10 +100,9 @@ with open('class_indices.json', 'w') as json_file:
     json.dump(class_indices, json_file)
 print("Class indices saved to 'class_indices.json'")
 
-# Convert history to DataFrame for easy plotting and analysis
+# Plot accuracy and loss
 history_df = pd.DataFrame(history.history)
 
-# Plot accuracy and loss over epochs
 plt.figure(figsize=(14, 6))
 
 # Plot accuracy
