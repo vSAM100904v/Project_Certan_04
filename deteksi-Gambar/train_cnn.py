@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import json
 
 # Define dataset directory
-dataset_dir = r'C:\Users\samue\Project_Certan_04\deteksi-Gambar\butterfly-image-classification\train'
+dataset_dir = r'C:\Users\Venesa Hutajulu\AKelompokCertan\deteksi-Gambar\deteksi-Gambar\butterfly-image-classification\train'
 
 # Data augmentation for training
 datagen = ImageDataGenerator(
@@ -85,7 +85,7 @@ reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=5, min_lr
 # Train the model
 history = model.fit(
     train_generator,
-    epochs=5,  # Allow more epochs for better generalization
+    epochs=25,  # Allow more epochs for better generalization
     validation_data=validation_generator,
     callbacks=[early_stopping, reduce_lr]
 )
