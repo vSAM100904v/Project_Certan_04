@@ -7,9 +7,10 @@ from tensorflow.keras.regularizers import l2
 import pandas as pd
 import matplotlib.pyplot as plt
 import json
+from tabulate import tabulate
 
 # Define dataset directory
-dataset_dir = r'C:\Users\Venesa Hutajulu\AKelompokCertan\deteksi-Gambar\deteksi-Gambar\butterfly-image-classification\train'
+dataset_dir = r'C:\Users\samue\Project_Certan_04\deteksi-Gambar\butterfly-image-classification\train'
 
 # Data augmentation for training
 datagen = ImageDataGenerator(
@@ -78,6 +79,21 @@ model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.0001),
               loss='categorical_crossentropy', 
               metrics=['accuracy'])
 
+# Display model summary in tabular form
+model_summary = []
+for layer in model.layers:
+    config = layer.get_config()
+    output_shape = layer.output.shape if hasattr(layer.output, 'shape') else "N/A"
+    model_summary.append([
+        layer.__class__.__name__,
+        config.get('name', ''),
+        output_shape,
+        layer.count_params()
+    ])
+
+print("\nModel Summary:")
+print(tabulate(model_summary, headers=["Layer Type", "Layer Name", "Output Shape", "Param #"], tablefmt="pretty"))
+
 # Callbacks for EarlyStopping and Learning Rate Reduction
 early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
 reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=5, min_lr=1e-6)
@@ -85,7 +101,7 @@ reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=5, min_lr
 # Train the model
 history = model.fit(
     train_generator,
-    epochs=25,  # Allow more epochs for better generalization
+    epochs=5,  # Allow more epochs for better generalization
     validation_data=validation_generator,
     callbacks=[early_stopping, reduce_lr]
 )
